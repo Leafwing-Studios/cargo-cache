@@ -1,0 +1,36 @@
+name: Cargo Cache
+description: Cache cargo build files and the registry
+inputs:
+  cache-group:
+    description: |
+      The group of the cache, defaults to the job ID.
+      If you want two jobs to share the same cache, give them the same group name.
+    required: false
+    default: ${{ github.job }}
+outputs:
+  random-number:
+    description: "Random number"
+    value: ${{ steps.random-number-generator.outputs.random-number }}
+runs:
+  using: composite
+  steps:
+    # TODO: Only do this when the lock file doesn't exist yet
+    # TODO: Give a better error message if cargo is not set up yet
+    - name: Create Cargo.lock file
+      shell: bash
+      run: cargo update
+
+    # See <https://github.com/actions/cache>
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        # Update the cache every time the lock file changes
+        key: ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.lock') }}
+        # Restore caches from the same group
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.cache-group }}-
