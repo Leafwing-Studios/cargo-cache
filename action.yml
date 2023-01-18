@@ -30,7 +30,8 @@ runs:
           ~/.cargo/git/db/
           target/
         # Update the cache every time the lock file changes
-        key: ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
         # Restore caches from the same group
         restore-keys: |
+          ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
           ${{ runner.os }}-${{ inputs.cache-group }}-
