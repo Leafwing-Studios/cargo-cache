@@ -23,10 +23,22 @@ runs:
       shell: bash
       run: |
         if [ -f "Cargo.lock" ]; then
-          echo "Reusing already existing Cargo.lock file."
+            echo "Reusing already existing Cargo.lock file."
         else 
             echo "Cargo.lock file does not exist, creating it..."
-            cargo update
+
+            # Check if cargo is installed
+            cargo --version
+
+            if [ $? -eq 0 ]; then
+                # Create Cargo.lock file
+                cargo update
+                exit $?
+            else
+                echo "Cargo is not installed!" >&2
+                echo "  help: Try using the 'actions-rs/toolchain@v1' action before this one." >&2
+                exit 1
+            fi
         fi
 
     # See <https://github.com/actions/cache>.
