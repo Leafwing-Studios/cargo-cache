@@ -8,9 +8,11 @@ inputs:
     required: false
     default: ${{ github.job }}
 outputs:
-  random-number:
-    description: "Random number"
-    value: ${{ steps.random-number-generator.outputs.random-number }}
+  cache-hit:
+    description: |
+      A boolean value to indicate if an exact match was found for the key.
+      Passed through from the `actions/cache` action.
+    value: ${{ steps.cache.outputs.random-number }}
 runs:
   using: composite
   steps:
@@ -43,6 +45,7 @@ runs:
 
     # See <https://github.com/actions/cache>.
     - name: Create cache
+      id: cache
       uses: actions/cache@v3
       with:
         path: |
