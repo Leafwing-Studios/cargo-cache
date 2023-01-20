@@ -16,6 +16,24 @@ outputs:
 runs:
   using: composite
   steps:
+    # Restore the cache from previous runs, but only the registry files.
+    # This should speed up the `cargo update command`.
+    - name: Restore Cargo registry cache
+      uses: actions/cache/restore@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+        # Same keys as used by the cache action below
+        key: ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+        # If the `Cargo.lock` file is not commited, we always fall back here.
+        # But this should still give us a recent registry.
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
+          ${{ runner.os }}-${{ inputs.cache-group }}-
+
     # The `Cargo.lock` file contains the exact crates used as dependencies.
     # It is important to use for the caching key, because it might become outdated otherwise.
     # If only the `Cargo.toml` file was used, patch releases of crates could cause unnecessary re-compiles.
