@@ -50,8 +50,7 @@ runs:
       with:
         path: |
           ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
+          ~/.cargo/registry/
           ~/.cargo/git/db/
           target/
         # Update the cache every time the `Cargo.lock` file changes (i.e., the dependencies change).
