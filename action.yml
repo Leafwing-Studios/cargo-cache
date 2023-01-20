@@ -26,6 +26,7 @@ runs:
           ~/.cargo/registry/index/
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
+          target/
         # Same keys as used by the cache action below
         key: ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
         # If the `Cargo.lock` file is not commited, we always fall back here.
