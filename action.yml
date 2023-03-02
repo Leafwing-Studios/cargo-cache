@@ -7,6 +7,22 @@ inputs:
       If you want two jobs to share the same cache, give them the same group name.
     required: false
     default: ${{ github.job }}
+  cargo-home:
+    description: |
+      The location of the Cargo cache files.
+      If you specify the `CARGO_HOME` env variable for your commands, you need to set it here too.
+      This must NOT end with the trailing slash of the directory.
+      Defaults to `~/.cargo`.
+    required: false
+    default: ~/.cargo
+  cargo-target-dir:
+    description: |
+      Location of where to place all generated artifacts, relative to the current working directory. 
+      If you specify the `CARGO_TARGET_DIR` env variable for your commands, you need to set it here too.
+      This must NOT end with the trailing slash of the directory.
+      Defaults to `target`.
+    required: false
+    default: target
 outputs:
   cache-hit:
     description: |
@@ -49,11 +65,11 @@ runs:
       uses: actions/cache@v3
       with:
         path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
+          ${{ inputs.cargo-home }}/bin/
+          ${{ inputs.cargo-home }}/registry/index/
+          ${{ inputs.cargo-home }}/registry/cache/
+          ${{ inputs.cargo-home }}/git/db/
+          ${{ inputs.cargo-target-dir }}/
         # Update the cache every time the `Cargo.lock` file changes (i.e., the dependencies change).
         # We also include the `Cargo.toml` files in the hash in case the compile configurations change.
         key: ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
