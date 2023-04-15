@@ -49,6 +49,6 @@ Under the hood, this action uses the `actions/cache` action to do the actual cac
 The cache key is generated from the `Cargo.toml` and `Cargo.lock` files, to ensure that the cache is always up-to-date.
 When the `Cargo.toml` or `Cargo.lock` files change, the cache falls back to previously cached versions to not start from scratch.
 
-When the `Cargo.lock` file was not commited to the repository (this is the case for libraries), it is first generated via `cargo update`.
+When the `Cargo.lock` file was not committed to the repository (this is the case for libraries), it is first generated via `cargo update`.
 This is why the `dtolnay/rust-toolchain` action must be used _before_ this action.
 For more information on why the `Cargo.toml` files don't specify the dependencies completely, please consult [the Cargo Book](https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html).
