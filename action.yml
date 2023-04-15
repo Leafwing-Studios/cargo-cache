@@ -54,7 +54,7 @@ runs:
                 exit $?
             else
                 echo "Cargo is not installed!" >&2
-                echo "  help: Try using the 'actions-rs/toolchain@v1' action before this one." >&2
+                echo "  help: Try using the 'dtolnay/rust-toolchain@master' action before this one." >&2
                 exit 1
             fi
         fi

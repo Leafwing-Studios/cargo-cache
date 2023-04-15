@@ -12,16 +12,15 @@ jobs:
   cargo-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Install Rust and Cargo
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
-          override: true
 
       # Cache the Cargo build files
-      # This action must be used *after* `actions-rs/toolchain`!
+      # This action must be used *after* `dtolnay/rust-toolchain`!
       - uses: Leafwing-Studios/cargo-cache@v1
 
       # Do stuff with Cargo
@@ -51,5 +50,5 @@ The cache key is generated from the `Cargo.toml` and `Cargo.lock` files, to ensu
 When the `Cargo.toml` or `Cargo.lock` files change, the cache falls back to previously cached versions to not start from scratch.
 
 When the `Cargo.lock` file was not commited to the repository (this is the case for libraries), it is first generated via `cargo update`.
-This is why the `actions-rs/toolchain` action must be used _before_ this action.
+This is why the `dtolnay/rust-toolchain` action must be used _before_ this action.
 For more information on why the `Cargo.toml` files don't specify the dependencies completely, please consult [the Cargo Book](https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html).
