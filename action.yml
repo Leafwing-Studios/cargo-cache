@@ -36,7 +36,7 @@ runs:
     # It is important to use for the caching key, because it might become outdated otherwise.
     # If only the `Cargo.toml` file was used, patch releases of crates could cause unnecessary re-compiles.
     # Therefore, if the `Cargo.lock` file does not yet exist (e.g. for libraries), we need to create it first.
-    # If the `Cargo.lock` file has been commited to the repo we reuse it to reproduce the same scenario.
+    # If the `Cargo.lock` file has been committed to the repo we reuse it to reproduce the same scenario.
     - name: Create Cargo.lock file
       shell: bash
       run: |
