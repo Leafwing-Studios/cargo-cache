@@ -59,6 +59,23 @@ runs:
             fi
         fi
 
+    # The dependencies are recompiled if a new Rust version is used
+    # This steps determines the Cargo version to include it in the cache key
+    - name: Get cargo version
+      id: cargo-version
+      shell: bash
+      run: |
+        # Print version once for debugging
+        cargo --version
+
+        # Extract the commit hash and date of the cargo version
+        # E.g. "cargo 1.72.0-nightly (0c14026aa 2023-06-14)" becomes "(0c14026aa 2023-06-14)"
+        version=$(cargo --version | grep -oE "\(([a-z0-9]+) [0-9-]+\)")
+
+        # Write the extracted version to a GitHub output variable
+        # See <https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions>
+        echo "cargo-version=$(echo $version)" >> $GITHUB_OUTPUT
+
     # See <https://github.com/actions/cache>.
     - name: Create cache
       id: cache
@@ -72,8 +89,9 @@ runs:
           ${{ inputs.cargo-target-dir }}/
         # Update the cache every time the `Cargo.lock` file changes (i.e., the dependencies change).
         # We also include the `Cargo.toml` files in the hash in case the compile configurations change.
-        key: ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+        # The Cargo version is also included in the hash, because a version change causes re-compiles
+        key: ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
         # Restore caches from the same group.
         restore-keys: |
-          ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
-          ${{ runner.os }}-${{ inputs.cache-group }}-
+          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
+          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ inputs.cache-group }}-

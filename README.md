@@ -52,3 +52,6 @@ When the `Cargo.toml` or `Cargo.lock` files change, the cache falls back to prev
 When the `Cargo.lock` file was not committed to the repository (this is the case for libraries), it is first generated via `cargo update`.
 This is why the `dtolnay/rust-toolchain` action must be used _before_ this action.
 For more information on why the `Cargo.toml` files don't specify the dependencies completely, please consult [the Cargo Book](https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html).
+
+Additionally, the Rust version reported by Cargo is included in the cache key.
+This prevents the cache from being outdated when a new Rust version is released, as this will result in a re-compile of all dependencies.
