@@ -109,7 +109,7 @@ runs:
           ${{ inputs.cargo-home }}/registry/cache/
           ${{ inputs.cargo-home }}/git/db/
           ${{ inputs.cargo-target-dir }}/
-        # Don't share a cache between different values of the following:
+        # Never share a cache between different values of the following:
         # - `cache-group`     (user-defined)
         # - `runner.os`       (build platform)
         # Reset the cache whenever one of the following changes:
