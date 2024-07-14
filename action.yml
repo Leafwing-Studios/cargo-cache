@@ -82,8 +82,8 @@ runs:
         # See <https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions>
         echo "cargo-version=$(echo $version)" >> "${GITHUB_OUTPUT}"
 
-    # The workflow file specifies the cargo command that will be run.
-    # If the cargo command changes, the previous cache will be outdated.
+    # The workflow file determines which cargo commands will run.
+    # If the workflow file changes, the commands may be different, so the old cache may be outdated.
     - name: Get workflow path
       id: workflow-path
       shell: bash
@@ -112,10 +112,10 @@ runs:
         # Don't share a cache between different values of the following:
         # - `cache-group`     (user-defined)
         # - `runner.os`       (build platform)
-        # Reset the cache any time one of the following changes:
+        # Reset the cache whenever one of the following changes:
         # - `cargo --version` (build toolchain)
         # - Workflow file     (build commands)
-        # Restore from a fallback cache any time one of the following changes:
+        # Restore from a fallback cache whenever one of the following changes:
         # - `Cargo.toml` file (build configs)
         # - `Cargo.lock` file (build dependencies)
         key: ${{ inputs.cache-group }}-${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles(env.WORKFLOW_PATH) }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
