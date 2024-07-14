@@ -110,16 +110,16 @@ runs:
           ${{ inputs.cargo-home }}/git/db/
           ${{ inputs.cargo-target-dir }}/
         # Never share a cache between different values of the following:
-        # - `cache-group`     (user-defined)
         # - `runner.os`       (build platform)
+        # - `cache-group`     (workflow job, or user-defined)
         # Reset the cache whenever one of the following changes:
+        # - Workflow file     (workflow contents)
         # - `cargo --version` (build toolchain)
-        # - Workflow file     (build commands)
         # Restore from a fallback cache whenever one of the following changes:
         # - `Cargo.toml` file (build configs)
         # - `Cargo.lock` file (build dependencies)
-        key: ${{ inputs.cache-group }}-${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles(env.WORKFLOW_PATH) }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles(env.WORKFLOW_PATH) }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
         # Restore caches from the same group.
         restore-keys: |
-          ${{ inputs.cache-group }}-${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles(env.WORKFLOW_PATH) }}-${{ hashFiles('**/Cargo.toml') }}-
-          ${{ inputs.cache-group }}-${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles(env.WORKFLOW_PATH) }}-
+          ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles(env.WORKFLOW_PATH) }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles('**/Cargo.toml') }}-
+          ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles(env.WORKFLOW_PATH) }}-${{ steps.cargo-version.outputs.cargo-version }}-
