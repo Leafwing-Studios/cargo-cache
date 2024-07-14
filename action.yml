@@ -80,7 +80,22 @@ runs:
 
         # Write the extracted version to a GitHub output variable
         # See <https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions>
-        echo "cargo-version=$(echo $version)" >> $GITHUB_OUTPUT
+        echo "cargo-version=$(echo $version)" >> "${GITHUB_OUTPUT}"
+
+    # The workflow file specifies the cargo command that will be run.
+    # If the cargo command changes, the previous cache will be outdated.
+    - name: Get workflow path
+      id: workflow-path
+      shell: bash
+      run: |
+          WORKFLOW_REF='${{ github.workflow_ref }}'
+          
+          # Strip git ref suffix
+          WORKFLOW_ABS_PATH="${WORKFLOW_REF%%@*}"
+          # Strip repository prefix
+          WORKFLOW_PATH="${WORKFLOW_ABS_PATH#'${{ github.repository }}/'}"
+          
+          echo "WORKFLOW_PATH=${WORKFLOW_PATH}" >> "${GITHUB_ENV}"
 
     # See <https://github.com/actions/cache>.
     - name: Create cache
@@ -94,11 +109,17 @@ runs:
           ${{ inputs.cargo-home }}/registry/cache/
           ${{ inputs.cargo-home }}/git/db/
           ${{ inputs.cargo-target-dir }}/
-        # Update the cache every time the `Cargo.lock` file changes (i.e., the dependencies change).
-        # We also include the `Cargo.toml` files in the hash in case the compile configurations change.
-        # The Cargo version is also included in the hash, because a version change causes re-compiles
-        key: ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+        # Don't share a cache between different values of the following:
+        # - `cache-group`     (user-defined)
+        # - `runner.os`       (build platform)
+        # Reset the cache any time one of the following changes:
+        # - `cargo --version` (build toolchain)
+        # - Workflow file     (build commands)
+        # Restore from a fallback cache any time one of the following changes:
+        # - `Cargo.toml` file (build configs)
+        # - `Cargo.lock` file (build dependencies)
+        key: ${{ inputs.cache-group }}-${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles(env.WORKFLOW_PATH) }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
         # Restore caches from the same group.
         restore-keys: |
-          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ inputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
-          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ inputs.cache-group }}-
+          ${{ inputs.cache-group }}-${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles(env.WORKFLOW_PATH) }}-${{ hashFiles('**/Cargo.toml') }}-
+          ${{ inputs.cache-group }}-${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles(env.WORKFLOW_PATH) }}-
