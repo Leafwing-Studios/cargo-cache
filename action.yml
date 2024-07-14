@@ -3,10 +3,10 @@ description: Cache cargo build files and the registry
 inputs:
   cache-group:
     description: |
-      The group of the cache, defaults to the job ID.
+      The group of the cache, defaults to a unique identifier for the workflow job.
       If you want two jobs to share the same cache, give them the same group name.
     required: false
-    default: ${{ github.job }}
+    default: ${{ github.job }}-${{ strategy.job-index }}
   cargo-home:
     description: |
       The location of the Cargo cache files.
@@ -82,20 +82,27 @@ runs:
         # See <https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions>
         echo "cargo-version=$(echo $version)" >> "${GITHUB_OUTPUT}"
 
-    # The workflow file determines which cargo commands will run.
-    # If the workflow file changes, the commands may be different, so the old cache may be outdated.
+    # If the workflow file's contents change, the new version's jobs should be considered distinct.
     - name: Get workflow path
-      id: workflow-path
       shell: bash
       run: |
-          WORKFLOW_REF='${{ github.workflow_ref }}'
-          
-          # Strip git ref suffix
-          WORKFLOW_ABS_PATH="${WORKFLOW_REF%%@*}"
-          # Strip repository prefix
-          WORKFLOW_PATH="${WORKFLOW_ABS_PATH#'${{ github.repository }}/'}"
-          
-          echo "WORKFLOW_PATH=${WORKFLOW_PATH}" >> "${GITHUB_ENV}"
+        workflow_ref='${{ github.workflow_ref }}'
+        # Strip git ref suffix
+        workflow_abs_path="${workflow_ref%%@*}"
+        # Strip repository prefix
+        echo "workflow_path=${workflow_abs_path#'${{ github.repository }}/'}" >> "${GITHUB_ENV}"
+
+    - name: Determine cache group
+      id: cache-group
+      shell: bash
+      run: |
+        if [ -n '${{ inputs.cache-group }}' ]; then
+          # Use the `cache-group` input if it was provided.
+          echo 'cache-group=${{ inputs.cache-group }}' >> "${GITHUB_OUTPUT}"
+        else
+          # If not, fall back to a unique identifier for the workflow job.
+          echo 'cache-group=${{ hashFiles(env.WORKFLOW_PATH) }}-${{ github.job }}-${{ strategy.job-index }}' >> "${GITHUB_OUTPUT}"
+        fi
 
     # See <https://github.com/actions/cache>.
     - name: Create cache
@@ -113,13 +120,12 @@ runs:
         # - `runner.os`       (build platform)
         # - `cache-group`     (workflow job, or user-defined)
         # Reset the cache whenever one of the following changes:
-        # - Workflow file     (workflow contents)
         # - `cargo --version` (build toolchain)
         # Restore from a fallback cache whenever one of the following changes:
         # - `Cargo.toml` file (build configs)
         # - `Cargo.lock` file (build dependencies)
-        key: ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles(env.WORKFLOW_PATH) }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-${{ steps.cache-group.outputs.cache-group }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
         # Restore caches from the same group.
         restore-keys: |
-          ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles(env.WORKFLOW_PATH) }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles('**/Cargo.toml') }}-
-          ${{ runner.os }}-${{ inputs.cache-group }}-${{ hashFiles(env.WORKFLOW_PATH) }}-${{ steps.cargo-version.outputs.cargo-version }}-
+          ${{ runner.os }}-${{ steps.cache-group.outputs.cache-group }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles('**/Cargo.toml') }}-
+          ${{ runner.os }}-${{ steps.cache-group.outputs.cache-group }}-${{ steps.cargo-version.outputs.cargo-version }}-
