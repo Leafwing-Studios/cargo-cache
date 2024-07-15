@@ -117,14 +117,15 @@ runs:
           ${{ inputs.cargo-target-dir }}/
         # Never share a cache between different values of the following:
         # - `runner.os`       (build platform)
-        # - `cache-group`     (workflow job, or user-defined)
         # Reset the cache whenever one of the following changes:
         # - `cargo --version` (build toolchain)
         # Restore from a fallback cache whenever one of the following changes:
         # - `Cargo.toml` file (build configs)
         # - `Cargo.lock` file (build dependencies)
-        key: ${{ runner.os }}-${{ steps.cache-group.outputs.cache-group }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+        # - `cache-group`     (workflow job, or user-defined)
+        key: ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-${{ steps.cache-group.outputs.cache-group }}
         # Restore caches from the same group.
         restore-keys: |
+          ${{ runner.os }}-${{ steps.cache-group.outputs.cache-group }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}-
           ${{ runner.os }}-${{ steps.cache-group.outputs.cache-group }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ hashFiles('**/Cargo.toml') }}-
           ${{ runner.os }}-${{ steps.cache-group.outputs.cache-group }}-${{ steps.cargo-version.outputs.cargo-version }}-
