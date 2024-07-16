@@ -100,7 +100,7 @@ runs:
           echo 'cache-group=${{ inputs.cache-group }}' >> "${GITHUB_OUTPUT}"
         else
           # If not, fall back to a unique identifier for the workflow job.
-          echo 'cache-group=${{ hashFiles(env.WORKFLOW_PATH) }}-${{ github.job }}-${{ strategy.job-index }}' >> "${GITHUB_OUTPUT}"
+          echo 'cache-group=${{ hashFiles(env.workflow_path) }}-${{ github.job }}-${{ strategy.job-index }}' >> "${GITHUB_OUTPUT}"
         fi
 
     # See <https://github.com/actions/cache>.
