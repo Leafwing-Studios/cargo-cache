@@ -27,7 +27,13 @@ inputs:
       Run the post step to save the cache even if another step before fails.
       Defaults to `true`.
     required: false
-    default: true
+    default: "true"
+  save-if:
+    description: |
+      A condition to determine whether the new cache should be saved.
+      If it evaluates to `false`, the cache is only loaded.
+    required: false
+    default: "true"
 outputs:
   cache-hit:
     description: |
@@ -103,10 +109,12 @@ runs:
           echo 'cache-group=${{ hashFiles(env.workflow_path) }}-${{ github.job }}-${{ strategy.job-index }}' >> "${GITHUB_OUTPUT}"
         fi
 
+    # If the cache should also be saved, we use the cache action
     # See <https://github.com/actions/cache>.
-    - name: Create cache
+    - name: Restore and save cache
       id: cache
       uses: actions/cache@v4
+      if: ${{ inputs.save-if == 'true' }}
       with:
         save-always: ${{ inputs.save-always }}
         path: |
@@ -115,15 +123,26 @@ runs:
           ${{ inputs.cargo-home }}/registry/cache/
           ${{ inputs.cargo-home }}/git/db/
           ${{ inputs.cargo-target-dir }}/
-        # Never share a cache between different values of the following:
-        # - `runner.os`       (build platform)
-        # - `cargo --version` (build toolchain)
-        # Restore from a fallback cache whenever one of the following changes:
-        # - `cache-group`     (workflow job, or user-defined)
-        # - `Cargo.toml` file (build configs)
-        # - `Cargo.lock` file (build dependencies)
         key: ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
-        # Restore caches from the same group.
+        restore-keys: |
+          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
+          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-
+          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-
+
+    # Otherwise, we only restore the cache
+    # See <https://github.com/actions/cache/tree/main/restore>.
+    - name: Restore cache
+      id: cache-restore
+      uses: actions/cache/restore@v4
+      if: ${{ inputs.save-if != 'true' }}
+      with:
+        path: |
+          ${{ inputs.cargo-home }}/bin/
+          ${{ inputs.cargo-home }}/registry/index/
+          ${{ inputs.cargo-home }}/registry/cache/
+          ${{ inputs.cargo-home }}/git/db/
+          ${{ inputs.cargo-target-dir }}/
+        key: ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
           ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-
