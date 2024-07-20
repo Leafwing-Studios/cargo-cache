@@ -109,38 +109,6 @@ runs:
           echo 'cache-group=${{ hashFiles(env.workflow_path) }}-${{ github.job }}-${{ strategy.job-index }}' >> "${GITHUB_OUTPUT}"
         fi
 
-    # Determine the parameters needed for the cache, so we can reuse them between saving and restoring variants
-    - name: Determine cache paths and keys
-      id: cache-params
-      shell: bash
-      run: |
-        # Determine cache paths
-        # The files that are saved
-        cache_paths="${{ inputs.cargo-home }}/bin/
-        ${{ inputs.cargo-home }}/registry/index/
-        ${{ inputs.cargo-home }}/registry/cache/
-        ${{ inputs.cargo-home }}/git/db/
-        ${{ inputs.cargo-target-dir }}/"
-        echo "CACHE PATHS:"
-        echo "$cache_paths"
-        echo "cache_paths=$cache_paths" >> "${GITHUB_OUTPUT}"
-
-        # Determine cache key
-        # If the key changes, the cache will be saved again
-        cache_key="${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}"
-        echo "CACHE KEY:"
-        echo "$cache_key"
-        echo "cache_key=$cache_key" >> "${GITHUB_OUTPUT}"
-
-        # Determine cache key fallbacks
-        # If the key changes, the fallbacks will be used to load the cache
-        cache_fallbacks="${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
-        ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-
-        ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-"
-        echo "CACHE FALLBACKS:"
-        echo "$cache_fallbacks"
-        echo "cache_fallbacks=$cache_fallbacks" >> "${GITHUB_OUTPUT}"
-
     # If the cache should also be saved, we use the cache action
     # See <https://github.com/actions/cache>.
     - name: Restore and save cache
@@ -149,9 +117,17 @@ runs:
       if: ${{ inputs.save-if }}
       with:
         save-always: ${{ inputs.save-always }}
-        path: ${{ steps.cache-params.outputs.cache_paths }}
-        key: ${{ steps.cache-params.outputs.cache_key }}
-        restore-keys: ${{ steps.cache-params.outputs.cache_fallbacks }}
+        path: |
+          ${{ inputs.cargo-home }}/bin/
+          ${{ inputs.cargo-home }}/registry/index/
+          ${{ inputs.cargo-home }}/registry/cache/
+          ${{ inputs.cargo-home }}/git/db/
+          ${{ inputs.cargo-target-dir }}/
+        key: ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
+          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-
+          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-
 
     # Otherwise, we only restore the cache
     # See <https://github.com/actions/cache/tree/main/restore>.
@@ -160,6 +136,14 @@ runs:
       uses: actions/cache/restore@v4
       if: ${{ ! inputs.save-if }}
       with:
-        path: ${{ steps.cache-params.outputs.cache_paths }}
-        key: ${{ steps.cache-params.outputs.cache_key }}
-        restore-keys: ${{ steps.cache-params.outputs.cache_fallbacks }}
+        path: |
+          ${{ inputs.cargo-home }}/bin/
+          ${{ inputs.cargo-home }}/registry/index/
+          ${{ inputs.cargo-home }}/registry/cache/
+          ${{ inputs.cargo-home }}/git/db/
+          ${{ inputs.cargo-target-dir }}/
+        key: ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
+          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-
+          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-
