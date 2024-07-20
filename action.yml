@@ -123,14 +123,14 @@ runs:
         ${{ inputs.cargo-target-dir }}/"
         echo "CACHE PATHS:"
         echo "$cache_paths"
-        echo 'cache_paths=$cache_paths' >> "${GITHUB_OUTPUT}"
+        echo "cache_paths=$cache_paths" >> "${GITHUB_OUTPUT}"
 
         # Determine cache key
         # If the key changes, the cache will be saved again
         cache_key="${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}"
         echo "CACHE KEY:"
         echo "$cache_key"
-        echo 'cache_key=$cache_key' >> "${GITHUB_OUTPUT}"
+        echo "cache_key=$cache_key" >> "${GITHUB_OUTPUT}"
 
         # Determine cache key fallbacks
         # If the key changes, the fallbacks will be used to load the cache
@@ -139,7 +139,7 @@ runs:
         ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-"
         echo "CACHE FALLBACKS:"
         echo "$cache_fallbacks"
-        echo 'cache_fallbacks=$cache_fallbacks' >> "${GITHUB_OUTPUT}"
+        echo "cache_fallbacks=$cache_fallbacks" >> "${GITHUB_OUTPUT}"
 
     # If the cache should also be saved, we use the cache action
     # See <https://github.com/actions/cache>.
