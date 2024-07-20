@@ -114,7 +114,7 @@ runs:
     - name: Restore and save cache
       id: cache
       uses: actions/cache@v4
-      if: ${{ inputs.save-if }}
+      if: ${{ inputs.save-if == "true" }}
       with:
         save-always: ${{ inputs.save-always }}
         path: |
@@ -134,7 +134,7 @@ runs:
     - name: Restore cache
       id: cache-restore
       uses: actions/cache/restore@v4
-      if: ${{ ! inputs.save-if }}
+      if: ${{ inputs.save-if != "true" }}
       with:
         path: |
           ${{ inputs.cargo-home }}/bin/
