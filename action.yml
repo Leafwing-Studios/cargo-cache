@@ -127,7 +127,6 @@ runs:
         restore-keys: |
           ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
           ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-
-          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-
 
     # Otherwise, we only restore the cache
     # See <https://github.com/actions/cache/tree/main/restore>.
@@ -146,4 +145,3 @@ runs:
         restore-keys: |
           ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
           ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-
-          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-
