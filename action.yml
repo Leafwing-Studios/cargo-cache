@@ -76,18 +76,26 @@ runs:
       id: rust-version
       shell: bash
       run: |
-        # Print version once for debugging
+        # Print version once for debugging.
         cargo --version
         rustc --version
 
-        # Extract the commit hash and date of the rust version
-        # E.g. "cargo 1.72.0-nightly (0c14026aa 2023-06-14)" becomes "(0c14026aa 2023-06-14)"
-        cargo=$(cargo --version | grep -oE "\(([a-z0-9]+) [0-9-]+\)")
-        rustc=$(rustc --version | grep -oE "\(([a-z0-9]+) [0-9-]+\)")
+        # Make a temporary file and save its path.
+        versions=$(mktemp)
 
-        # Write the extracted version to a GitHub output variable
-        # See <https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions>
-        echo "rust-version=$(echo $cargo)-$(echo $rustc)" >> "${GITHUB_OUTPUT}"
+        # Save the version output of both tools to the temporary file. We need both versions
+        # because sometimes one tool gets updated in a patch update and the other does not.
+        cargo --version >> $versions
+        rustc --version >> $versions
+
+        # Calculate the checksum of the entire file. This is a unique identifier that will change
+        # if either of the above outputs change. (We also use `cut` to extract just the checksum,
+        # ignoring the rest of `cksum`'s output.)
+        sum=$(cksum $versions | cut -f 1 -d ' ')
+
+        # Write the extracted version to a GitHub output variable.
+        # See <https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions>.
+        echo "rust-version=$sum" >> "${GITHUB_OUTPUT}"
 
     # If the workflow file's contents change, the new version's jobs should be considered distinct.
     - name: Get workflow path
