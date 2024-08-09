@@ -80,7 +80,7 @@ runs:
         cargo --version
         rustc --version
 
-        # Extract the commit hash and date of the cargo version
+        # Extract the commit hash and date of the rust version
         # E.g. "cargo 1.72.0-nightly (0c14026aa 2023-06-14)" becomes "(0c14026aa 2023-06-14)"
         cargo=$(cargo --version | grep -oE "\(([a-z0-9]+) [0-9-]+\)")
         rustc=$(rustc --version | grep -oE "\(([a-z0-9]+) [0-9-]+\)")
