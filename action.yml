@@ -71,21 +71,23 @@ runs:
         fi
 
     # The dependencies are recompiled if a new Rust version is used
-    # This steps determines the Cargo version to include it in the cache key
+    # This steps determines the rustc and cargo version to include it in the cache key
     - name: Get cargo version
-      id: cargo-version
+      id: rust-version
       shell: bash
       run: |
         # Print version once for debugging
         cargo --version
+        rustc --version
 
         # Extract the commit hash and date of the cargo version
         # E.g. "cargo 1.72.0-nightly (0c14026aa 2023-06-14)" becomes "(0c14026aa 2023-06-14)"
-        version=$(cargo --version | grep -oE "\(([a-z0-9]+) [0-9-]+\)")
+        cargo=$(cargo --version | grep -oE "\(([a-z0-9]+) [0-9-]+\)")
+        rustc=$(rustc --version | grep -oE "\(([a-z0-9]+) [0-9-]+\)")
 
         # Write the extracted version to a GitHub output variable
         # See <https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions>
-        echo "cargo-version=$(echo $version)" >> "${GITHUB_OUTPUT}"
+        echo "rust-version=$(echo $cargo)-$(echo $rustc)" >> "${GITHUB_OUTPUT}"
 
     # If the workflow file's contents change, the new version's jobs should be considered distinct.
     - name: Get workflow path
@@ -123,10 +125,10 @@ runs:
           ${{ inputs.cargo-home }}/registry/cache/
           ${{ inputs.cargo-home }}/git/db/
           ${{ inputs.cargo-target-dir }}/
-        key: ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
-          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
-          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-
+          ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
+          ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-
 
     # Otherwise, we only restore the cache
     # See <https://github.com/actions/cache/tree/main/restore>.
@@ -141,7 +143,7 @@ runs:
           ${{ inputs.cargo-home }}/registry/cache/
           ${{ inputs.cargo-home }}/git/db/
           ${{ inputs.cargo-target-dir }}/
-        key: ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
-          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
-          ${{ runner.os }}-${{ steps.cargo-version.outputs.cargo-version }}-${{ steps.cache-group.outputs.cache-group }}-
+          ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
+          ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-
