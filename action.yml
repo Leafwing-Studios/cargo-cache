@@ -34,6 +34,25 @@ inputs:
       If it evaluates to `false`, the cache is only loaded.
     required: false
     default: "true"
+  sweep-cache:
+    description: |
+      Use `cargo-sweep` to automatically delete files in the target folder that are not used
+      between when this action is called and the end of the workflow. This can prevent the size of
+      caches steadily increasing, since new caches are generated from fallback caches that may
+      include stale artifacts.
+    required: false
+    default: "false"
+  sweep-cache-prebuilt:
+    description: |
+      Download a prebuilt binary of `cargo-sweep` instead of installing it manually.
+
+      If `sweep-cache` is true, it will be default run `cargo install cargo-sweep` in order to use
+      the tool. This can be sped up by opting-in to prebuilt binaries: copies of `cargo-sweep`
+      built weekly at <https://github.com/BD103/cargo-sweep> for Github-hosted runners. These
+      executables use artifact attestations to verify their checksum, but they still introduce a
+      security risk, so they're disabled by default.
+    required: false
+    default: "false"
 outputs:
   cache-hit:
     description: |
@@ -147,3 +166,9 @@ runs:
         restore-keys: |
           ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
           ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-
+
+    - name: Sweep cache
+      uses: BD103/cargo-sweep@v1
+      if: ${{ inputs.sweep-cache }}
+      with:
+        use-prebuilt: ${{ inputs.sweep-cache-prebuilt }}
