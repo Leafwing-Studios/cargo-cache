@@ -168,3 +168,6 @@ runs:
       if: ${{ inputs.sweep-cache }}
       with:
         use-cache: ${{ inputs.cache-cargo-sweep }}
+        # Prebuilt binaries are discouraged now that caching is supported. While it is false by
+        # default, this is a precautionary measure that opts-out.
+        use-prebuilt: false
