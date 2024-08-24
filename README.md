@@ -38,7 +38,9 @@ jobs:
 | `save-if`          | A condition which determines whether the cache should be saved. Otherwise, it's only restored                                                                                                                                                                 | `boolean` | `true`                                                                         |
 | `save-always`      | Run the post step to save the cache even if another step before fails.                                                                                                                                                                                        | `boolean` | `true`                                                                         |
 |`sweep-cache`|Use `cargo-sweep` to automatically delete files in the target folder that are not used between when this action is called and the end of the workflow. This can prevent the size of caches steadily increasing, since new caches are generated from fallback caches that may include stale artifacts.|`boolean`|`false`|
-|`sweep-cache-prebuilt`|Download a prebuilt binary of [`cargo-sweep`](https://crates.io/crates/cargo-sweep) instead of installing it manually. If `sweep-cache` is true, it will by default run `cargo install cargo-sweep` in order to use the tool. This can be sped up by opting-in to prebuilt binaries: copies of `cargo-sweep` built weekly at <https://github.com/BD103/cargo-sweep> for Github-hosted runners. These executables use artifact attestations to verify their checksum, but they still introduce a security risk, so they're disabled by default.|`boolean`|`false`|
+|`cache-cargo-sweep`|Only has effect if `sweep-cache` is true. `sweep-cache` works by using [`cargo-sweep`], which is built using `cargo install`. If `cache-cargo-sweep` is true, this action will save the resulting binary to its own cache so that it does not need to be rebuilt in subsequent runs.|`boolean`|`true`|
+
+[`cargo-sweep`]: https://crates.io/crates/cargo-sweep
 
 ## Outputs
 

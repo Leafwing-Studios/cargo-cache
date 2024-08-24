@@ -42,17 +42,13 @@ inputs:
       include stale artifacts.
     required: false
     default: "false"
-  sweep-cache-prebuilt:
+  cache-cargo-sweep:
     description: |
-      Download a prebuilt binary of `cargo-sweep` instead of installing it manually.
-
-      If `sweep-cache` is true, it will by default run `cargo install cargo-sweep` in order to use
-      the tool. This can be sped up by opting-in to prebuilt binaries: copies of `cargo-sweep`
-      built weekly at <https://github.com/BD103/cargo-sweep> for Github-hosted runners. These
-      executables use artifact attestations to verify their checksum, but they still introduce a
-      security risk, so they're disabled by default.
+      Only has effect if `sweep-cache` is true. `sweep-cache` works by using `cargo-sweep`, which
+      is built using `cargo install`. If `cache-cargo-sweep` is enabled, this action will save the
+      resuilting binary to its own cache so that it does not need to be rebuilt.
     required: false
-    default: "false"
+    default: "true"
 outputs:
   cache-hit:
     description: |
@@ -171,4 +167,4 @@ runs:
       uses: BD103/cargo-sweep@v1
       if: ${{ inputs.sweep-cache }}
       with:
-        use-prebuilt: ${{ inputs.sweep-cache-prebuilt }}
+        use-cache: ${{ inputs.cache-cargo-sweep }}
