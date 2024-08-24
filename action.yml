@@ -46,7 +46,7 @@ inputs:
     description: |
       Download a prebuilt binary of `cargo-sweep` instead of installing it manually.
 
-      If `sweep-cache` is true, it will be default run `cargo install cargo-sweep` in order to use
+      If `sweep-cache` is true, it will by default run `cargo install cargo-sweep` in order to use
       the tool. This can be sped up by opting-in to prebuilt binaries: copies of `cargo-sweep`
       built weekly at <https://github.com/BD103/cargo-sweep> for Github-hosted runners. These
       executables use artifact attestations to verify their checksum, but they still introduce a
