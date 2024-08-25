@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  # Run when a commit is made or PR is merged to the main branch.
+  push:
+    branches: [main]
+  # Run when a PR is updated.
+  pull_request:
+  # Allow running manually.
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test action
+    # TODO(BD103): Test matrix of OS's.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Initialize Rust project
+        run: cargo init --bin
+
+      - name: Cache build files
+        # This will call `action.yml`.
+        uses: ./
+
+      - name: Build Rust project
+        run: cargo build
