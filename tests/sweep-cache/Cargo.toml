@@ -1,0 +1,8 @@
+[package]
+name = "test-sweep-cache"
+edition = "2021"
+publish = false
+
+[dependencies]
+# Use an old, outdated version of a library.
+petitset = "=0.1.0"
