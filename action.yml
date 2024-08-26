@@ -71,7 +71,7 @@ runs:
         cargo --version
 
         # Check that the exit code of the previous command is 0, signaling a success.
-        if [[ #? -eq 0 ]]; then
+        if [[ $? -eq 0 ]]; then
           # We are assuming that `rustc` is installed if Cargo is.
           echo 'Cargo is installed!'
         else
