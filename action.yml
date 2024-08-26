@@ -94,19 +94,19 @@ runs:
       run: |
         # Locate the root `Cargo.toml` from the a given `Cargo.toml` manifest, then use `jq` to
         # extract the result from JSON.
-        root-manifest=$(cargo locate-project --manifest-path "${MANIFEST_PATH}" --workspace | jq -r '.root')
+        ROOT_MANIFEST=$(cargo locate-project --manifest-path "${MANIFEST_PATH}" --workspace | jq -r '.root')
 
         # Find the `Cargo.lock` that lives next to the root `Cargo.toml`.
-        root-lockfile=$(dirname "${root-manifest}")/Cargo.lock
+        ROOT_LOCKFILE=$(dirname "${ROOT_MANIFEST}")/Cargo.lock
 
         # Check if `Cargo.lock` exists.
-        if [ -f "${root-lockfile}" ]; then
+        if [ -f "${ROOT_LOCKFILE}" ]; then
           echo "Reusing existing `Cargo.lock` file."
         else 
           echo "Cargo.lock file does not exist, creating it..."
 
           # Create `Cargo.lock` file
-          cargo update --manifest-path "${root-manifest}"
+          cargo update --manifest-path "${ROOT_MANIFEST}"
         fi
 
     # The dependencies are recompiled if a new Rust version is used
