@@ -22,6 +22,11 @@ inputs:
       Defaults to `target`.
     required: false
     default: target
+  manifest-path:
+    description: |
+      The path to `Cargo.toml`. This is used to determine where `Cargo.lock` is, which is used in
+      the cache key.
+      Defaults to the `Cargo.toml` in the current working directory.
   save-always:
     description: |
       Run the post step to save the cache even if another step before fails.
@@ -58,6 +63,23 @@ outputs:
 runs:
   using: composite
   steps:
+    # We use Cargo throughout the rest of this action for things like generating the lockfile
+    # and tracking the version in the cache key. If it's not installed, exit early. 
+    - name: Check that Cargo is installed
+      shell: bash
+      run: |
+        cargo --version
+
+        # Check that the exit code of the previous command is 0, signaling a success.
+        if [[ #? -eq 0 ]]; then
+          # We are assuming that `rustc` is installed if Cargo is.
+          echo 'Cargo is installed!'
+        else
+          echo 'Cargo is not installed!' >&2
+          echo '  help: Try using the `dtolnay/rust-toolchain` action before this one.' >&2
+          exit 1
+        fi
+
     # The `Cargo.lock` file contains the exact crates used as dependencies.
     # It is important to use for the caching key, because it might become outdated otherwise.
     # If only the `Cargo.toml` file was used, patch releases of crates could cause unnecessary re-compiles.
@@ -65,24 +87,24 @@ runs:
     # If the `Cargo.lock` file has been committed to the repo we reuse it to reproduce the same scenario.
     - name: Create Cargo.lock file
       shell: bash
+      env:
+        MANIFEST_PATH: ${{ inputs.manifest-path }}
       run: |
-        if [ -f "Cargo.lock" ]; then
-            echo "Reusing already existing Cargo.lock file."
+        # Locate the root `Cargo.toml` from the a given `Cargo.toml` manifest, then use `jq` to
+        # extract the result from JSON.
+        root-manifest=$(cargo locate-project --manifest-path "${MANIFEST_PATH}" --workspace | jq -r '.root')
+
+        # Find the `Cargo.lock` that lives next to the root `Cargo.toml`.
+        root-lockfile=$(dirname "${root-manifest}")/Cargo.lock
+
+        # Check if `Cargo.lock` exists.
+        if [ -f "${root-lockfile}" ]; then
+          echo "Reusing existing `Cargo.lock` file."
         else 
-            echo "Cargo.lock file does not exist, creating it..."
+          echo "Cargo.lock file does not exist, creating it..."
 
-            # Check if cargo is installed
-            cargo --version
-
-            if [ $? -eq 0 ]; then
-                # Create Cargo.lock file
-                cargo update
-                exit $?
-            else
-                echo "Cargo is not installed!" >&2
-                echo "  help: Try using the 'dtolnay/rust-toolchain@master' action before this one." >&2
-                exit 1
-            fi
+          # Create `Cargo.lock` file
+          cargo update --manifest-path "${root-manifest}"
         fi
 
     # The dependencies are recompiled if a new Rust version is used
