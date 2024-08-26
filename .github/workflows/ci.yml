@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  # Run when a commit is made or PR is merged to the main branch.
+  push:
+    branches: [main]
+  # Run when a PR is updated.
+  pull_request:
+  # Allow running manually.
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test action
+    strategy:
+      # Do not cancel in-progress jobs if one fails.
+      fail-fast: false
+      matrix:
+        # Test each of Github's hosted runners.
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Initialize Rust project
+        run: cargo init --bin
+
+      - name: Cache build files
+        # This will call `action.yml`.
+        uses: ./
+
+      - name: Build Rust project
+        run: cargo build
