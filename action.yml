@@ -27,6 +27,8 @@ inputs:
       The path to `Cargo.toml`. This is used to determine where `Cargo.lock` is, which is used in
       the cache key.
       Defaults to the `Cargo.toml` in the current working directory.
+    required: false
+    default: "Cargo.toml"
   save-always:
     description: |
       Run the post step to save the cache even if another step before fails.
