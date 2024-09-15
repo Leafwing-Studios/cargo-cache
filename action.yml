@@ -101,7 +101,7 @@ runs:
 
         # Check if `Cargo.lock` exists.
         if [ -f "${ROOT_LOCKFILE}" ]; then
-          echo "Reusing existing `Cargo.lock` file."
+          echo 'Reusing existing `Cargo.lock` file.'
         else 
           echo "Cargo.lock file does not exist, creating it..."
 
