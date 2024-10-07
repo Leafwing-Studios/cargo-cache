@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    name: Test action
+  test-default:
+    name: Test default action configuration
     strategy:
       # Do not cancel in-progress jobs if one fails.
       fail-fast: false
@@ -33,5 +33,51 @@ jobs:
         # This will call `action.yml`.
         uses: ./
 
-      - name: Build Rust project
+      - name: Build project
+        run: cargo build
+
+  generate-sweep-cache:
+    name: Generate outdated cache for `cargo-sweep`
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache build files
+        # This will call `action.yml`.
+        uses: ./
+        with:
+          cache-group: sweep-cache
+          cargo-target-dir: tests/sweep-cache/target
+
+      - name: Build project
+        run: cargo build
+
+  sweep-cache:
+    name: Sweep stale files from cache
+    needs: [generate-sweep-cache]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      # By upgrading `petitset` to 0.2.1, we are making all 0.1.0 `petitset` content stale.
+      - name: Upgrade petitset
+        working-directory: tests/sweep-cache
+        run: cargo add petitset@=0.2.1
+
+      - name: Cache build files
+        # This will call `action.yml`.
+        uses: ./
+        with:
+          cache-group: sweep-cache
+          cargo-target-dir: tests/sweep-cache/target
+
+      - name: Build project
         run: cargo build
