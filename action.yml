@@ -31,10 +31,13 @@ inputs:
     default: "Cargo.toml"
   save-always:
     description: |
-      Run the post step to save the cache even if another step before fails.
-      Defaults to `true`.
+      This input has been deprecated and will be removed in v3.0.0. It has no effect.
+
+      This input used to specify the `save-always` input for `actions/cache`, but has been
+      deprecated due to its unintended behavior. If you still require this input, you will need
+      to manually use `actions/cache`. For more information, please see
+      <https://github.com/actions/cache/tree/v4/save#always-save-cache>.
     required: false
-    default: "true"
   save-if:
     description: |
       A condition to determine whether the new cache should be saved.
@@ -147,6 +150,12 @@ runs:
           echo 'cache-group=${{ hashFiles(env.workflow_path) }}-${{ github.job }}-${{ strategy.job-index }}' >> "${GITHUB_OUTPUT}"
         fi
 
+    - name: Log that `save-always` is deprecated
+      if: ${{ inputs.save-always }}
+      shell: bash
+      run: |
+        echo '::warning title=`save-always` is deprecated::`save-always` does not work as intended and will be removed in v3.0.0.'
+
     # If the cache should also be saved, we use the cache action
     # See <https://github.com/actions/cache>.
     - name: Restore and save cache
@@ -154,7 +163,6 @@ runs:
       uses: actions/cache@v4
       if: ${{ inputs.save-if == 'true' }}
       with:
-        save-always: ${{ inputs.save-always }}
         path: |
           ${{ inputs.cargo-home }}/bin/
           ${{ inputs.cargo-home }}/registry/index/
