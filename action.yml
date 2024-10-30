@@ -188,10 +188,7 @@ runs:
           ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-
 
     - name: Sweep cache
-      uses: BD103/cargo-sweep@v1
-      if: ${{ inputs.sweep-cache }}
+      uses: BD103/cargo-sweep@v2
+      if: ${{ inputs.sweep-cache == 'true' }}
       with:
-        use-cache: ${{ inputs.cache-cargo-sweep }}
-        # Prebuilt binaries are discouraged now that caching is supported. While it is false by
-        # default, this is a precautionary measure that opts-out.
-        use-prebuilt: false
+        manifest-path: ${{ inputs.manifest-path }}
