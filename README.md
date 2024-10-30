@@ -30,18 +30,53 @@ jobs:
 
 ## Inputs
 
-| Name               | Description                                                                                                                                                                                                                                                   | Type      | Default                                                                        |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------ |
-| `cache-group`      | The group of the cache, defaults to a unique identifier for the workflow job. If you want two jobs to share the same cache, give them the same group name.                                                                                                    | `string`  | `${{ hashFiles(env.workflow_path)-${{ github.job }}-${{ strategy.job-index }}` |
-| `cargo-home`       | The location of the Cargo cache files. If you specify the `CARGO_HOME` env variable for your commands, you need to set it here too. This must NOT end with the trailing slash of the directory.                                                               | `string`  | `~/.cargo`                                                                     |
-| `cargo-target-dir` | Location of where to place all generated artifacts, relative to the current working directory. If you specify the `CARGO_TARGET_DIR` env variable for your commands, you need to set it here too. This must NOT end with the trailing slash of the directory. | `string`  | `target`                                                                       |
-|`manifest-path`|The path to `Cargo.toml`. This is used to determine where `Cargo.lock` is, which is used in the cache key.|`string`|`Cargo.toml`|
-| `save-if`          | A condition which determines whether the cache should be saved. Otherwise, it's only restored                                                                                                                                                                 | `boolean` | `true`                                                                         |
-| `save-always`      | Run the post step to save the cache even if another step before fails.                                                                                                                                                                                        | `boolean` | `true`                                                                         |
-|`sweep-cache`|Use `cargo-sweep` to automatically delete files in the target folder that are not used between when this action is called and the end of the workflow. This can prevent the size of caches steadily increasing, since new caches are generated from fallback caches that may include stale artifacts.|`boolean`|`false`|
-|`cache-cargo-sweep`|Only has effect if `sweep-cache` is true. `sweep-cache` works by using [`cargo-sweep`], which is built using `cargo install`. If `cache-cargo-sweep` is true, this action will save the resulting binary to its own cache so that it does not need to be rebuilt in subsequent runs.|`boolean`|`true`|
+```yaml
+- uses: Leafwing-Studios/cargo-cache@v2
+  with:
+    # The group of the cache, defaulting to a unique identifier for the workflow job.
+    #
+    # If you want two jobs to share the same cache, give them the same group name.
+    cache-group: ${{ hashFiles(env.workflow_path)-${{ github.job }}-${{ strategy.job-index }}`
 
-[`cargo-sweep`]: https://crates.io/crates/cargo-sweep
+    # The location of the Cargo home directory.
+    #
+    # If you specify the `CARGO_HOME` env variable for your commands, you need to set it here too.
+    # This must *not* end with the trailing slash of the directory.
+    cargo-home: ~/.cargo
+
+    # The location where Cargo places all generated artifacts, relative to the current working
+    # directory.
+    #
+    # If you specify the `CARGO_TARGET_DIR` environmental variable or `--target-dir` for your
+    # commands, you need to set it here as well. This must *not* end with the trailing slash of the directory.
+    cargo-target-dir: target
+
+    # The path to `Cargo.toml`.
+    #
+    # This is used to determine where `Cargo.lock` and is, which is used in the cache key.
+    manifest-path: Cargo.toml
+
+    # Save the cache even if a previous step fails.
+    save-always: true
+
+    # Determines if the cache should be saved, or only loaded.
+    #
+    # Setting this to `false` will prevent new caches from being created.
+    save-if: true
+
+    # Automatically delete files in the target folder that are not used between when this action is
+    # called and the end of the job.
+    #
+    # This can prevent the size of caches snowballing. Since old caches are used to create new
+    # caches, unused files can slowly pile up over time, causing larger caches are longer runtimes.
+    sweep-cache: false
+
+    # Save the compiled `cargo-sweep` binary so that it can be downloaded from a cache in future
+    # runs.
+    #
+    # This only has effect if `sweep-cache` is true.
+    cache-cargo-sweep: true
+```
 
 ## Outputs
 
