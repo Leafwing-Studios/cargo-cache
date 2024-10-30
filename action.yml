@@ -63,9 +63,10 @@ inputs:
 outputs:
   cache-hit:
     description: |
-      A boolean value to indicate if an exact match was found for the key.
-      Passed through from the `actions/cache` action.
-    value: ${{ steps.cache.outputs.random-number }}
+      A string value that indicates if an exact match was found for the key.
+
+      This is passed through from the `actions/cache` action.
+    value: ${{ steps.cache.outputs.cache-hit }}
 runs:
   using: composite
   steps:

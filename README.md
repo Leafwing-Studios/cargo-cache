@@ -80,9 +80,8 @@ jobs:
 
 ## Outputs
 
-| Name        | Description                                                          | Type      | Note                                            |
-| ----------- | -------------------------------------------------------------------- | --------- | ----------------------------------------------- |
-| `cache-hit` | A boolean value to indicate if an exact match was found for the key. | `boolean` | Passed through from the `actions/cache` action. |
+- `cache-hit`: A string value that indicates if an exact match was found for the key.
+  - This is passed from `actions/cache`, so please see [its output documentation](https://github.com/actions/cache/tree/v4#outputs) for more information.
 
 ## How It Works
 
