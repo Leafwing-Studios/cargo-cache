@@ -186,6 +186,7 @@ runs:
 
     - name: Log that `cache-cargo-sweep` is deprecated
       if: ${{ inputs.cache-cargo-sweep }}
+      shell: bash
       run: |
         echo '::warning title=`cache-cargo-sweep` is deprecated::With updates to `BD103/cargo-sweep`, it no longer has any effect. It will be removed in v3.0.0.'
 
