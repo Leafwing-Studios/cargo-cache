@@ -51,11 +51,8 @@ inputs:
     default: "false"
   cache-cargo-sweep:
     description: |
-      Only has effect if `sweep-cache` is true. `sweep-cache` works by using `cargo-sweep`, which
-      is built using `cargo install`. If `cache-cargo-sweep` is enabled, this action will save the
-      resuilting binary to its own cache so that it does not need to be rebuilt.
+      This input has been deprecated and will be removed in v3.0.0. It has no effect.
     required: false
-    default: "true"
 outputs:
   cache-hit:
     description: |
@@ -186,6 +183,11 @@ runs:
         restore-keys: |
           ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
           ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-
+
+    - name: Log that `cache-cargo-sweep` is deprecated
+      if: ${{ inputs.cache-cargo-sweep }}
+      run: |
+        echo '::warning title=`cache-cargo-sweep` is deprecated::With updates to `BD103/cargo-sweep`, it no longer has any effect. It will be removed in v3.0.0.'
 
     - name: Sweep cache
       uses: BD103/cargo-sweep@v2
