@@ -39,7 +39,7 @@ jobs:
 | `save-if`          | A condition which determines whether the cache should be saved. Otherwise, it's only restored                                                                                                                                                                 | `boolean` | `true`                                                                         |
 | `save-always`      | Run the post step to save the cache even if another step before fails.                                                                                                                                                                                        | `boolean` | `true`                                                                         |
 |`sweep-cache`|Use `cargo-sweep` to automatically delete files in the target folder that are not used between when this action is called and the end of the workflow. This can prevent the size of caches steadily increasing, since new caches are generated from fallback caches that may include stale artifacts.|`boolean`|`false`|
-|`cache-cargo-sweep`|Only has effect if `sweep-cache` is true. `sweep-cache` works by using [`cargo-sweep`], which is built using `cargo install`. If `cache-cargo-sweep` is true, this action will save the resulting binary to its own cache so that it does not need to be rebuilt in subsequent runs.|`boolean`|`true`|
+|`cache-cargo-sweep`|This input has been deprecated and will be removed in v3.0.0. It has no effect.|`boolean`||
 
 [`cargo-sweep`]: https://crates.io/crates/cargo-sweep
 
