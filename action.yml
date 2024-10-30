@@ -150,6 +150,12 @@ runs:
           echo 'cache-group=${{ hashFiles(env.workflow_path) }}-${{ github.job }}-${{ strategy.job-index }}' >> "${GITHUB_OUTPUT}"
         fi
 
+    - name: Log that `save-always` is deprecated
+      if: ${{ inputs.save-always }}
+      shell: bash
+      run: |
+        echo '::warning title=`save-always` is deprecated::`save-always` does not work as intended and will be removed in v3.0.0.'
+
     # If the cache should also be saved, we use the cache action
     # See <https://github.com/actions/cache>.
     - name: Restore and save cache
