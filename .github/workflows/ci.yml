@@ -32,8 +32,6 @@ jobs:
       - name: Cache build files
         # This will call `action.yml`.
         uses: ./
-        with:
-          sweep-cache: true
 
       - name: Build Rust project
         run: cargo build
