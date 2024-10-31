@@ -3,32 +3,35 @@ description: Cache cargo build files and the registry
 inputs:
   cache-group:
     description: |
-      The group of the cache, defaults to a unique identifier for the workflow job.
+      The group of the cache, defaulting to a unique identifier for the workflow job.
+
       If you want two jobs to share the same cache, give them the same group name.
     required: false
   cargo-home:
     description: |
-      The location of the Cargo cache files.
+      The location of the Cargo home directory.
+
       If you specify the `CARGO_HOME` env variable for your commands, you need to set it here too.
-      This must NOT end with the trailing slash of the directory.
-      Defaults to `~/.cargo`.
+      This must *not* end with the trailing slash of the directory.
     required: false
     default: ~/.cargo
   cargo-target-dir:
     description: |
-      Location of where to place all generated artifacts, relative to the current working directory. 
-      If you specify the `CARGO_TARGET_DIR` env variable for your commands, you need to set it here too.
-      This must NOT end with the trailing slash of the directory.
-      Defaults to `target`.
+      The location where Cargo places all generated artifacts, relative to the current working
+      directory.
+
+      If you specify the `CARGO_TARGET_DIR` environmental variable or `--target-dir` for your
+      commands, you need to set it here as well. This must *not* end with the trailing slash of the
+      directory.
     required: false
     default: target
   manifest-path:
     description: |
-      The path to `Cargo.toml`. This is used to determine where `Cargo.lock` is, which is used in
-      the cache key.
-      Defaults to the `Cargo.toml` in the current working directory.
+      The path to `Cargo.toml`.
+
+      This is used to determine where `Cargo.lock` and is, which is used in the cache key.
     required: false
-    default: "Cargo.toml"
+    default: Cargo.toml
   save-always:
     description: |
       This input has been deprecated and will be removed in v3.0.0. It has no effect.
@@ -40,16 +43,18 @@ inputs:
     required: false
   save-if:
     description: |
-      A condition to determine whether the new cache should be saved.
-      If it evaluates to `false`, the cache is only loaded.
+      Determines if the cache should be saved, or only loaded.
+
+      Setting this to `false` will prevent new caches from being created.
     required: false
     default: "true"
   sweep-cache:
     description: |
-      Use `cargo-sweep` to automatically delete files in the target folder that are not used
-      between when this action is called and the end of the workflow. This can prevent the size of
-      caches steadily increasing, since new caches are generated from fallback caches that may
-      include stale artifacts.
+      Automatically delete files in the target folder that are not used between when this action is
+      called and the end of the job.
+
+      This can prevent the size of caches snowballing. Since old caches are used to create new
+      caches, unused files can slowly pile up over time, causing larger caches are longer runtimes.
     required: false
     default: "false"
   cache-cargo-sweep:
@@ -59,9 +64,10 @@ inputs:
 outputs:
   cache-hit:
     description: |
-      A boolean value to indicate if an exact match was found for the key.
-      Passed through from the `actions/cache` action.
-    value: ${{ steps.cache.outputs.random-number }}
+      A string value that indicates if an exact match was found for the key.
+
+      This is passed through from the `actions/cache` action.
+    value: ${{ steps.cache.outputs.cache-hit }}
 runs:
   using: composite
   steps:
