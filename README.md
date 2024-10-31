@@ -56,8 +56,13 @@ jobs:
     # This is used to determine where `Cargo.lock` and is, which is used in the cache key.
     manifest-path: Cargo.toml
 
-    # Save the cache even if a previous step fails.
-    save-always: true
+    # This input has been deprecated and will be removed in v3.0.0. It has no effect.
+    #
+    # This input used to specify the `save-always` input for `actions/cache`, but has been
+    # deprecated due to its unintended behavior. If you still require this input, you will need
+    # to manually use `actions/cache`. For more information, please see
+    # <https://github.com/actions/cache/tree/v4/save#always-save-cache>.
+    save-always: ''
 
     # Determines if the cache should be saved, or only loaded.
     #
@@ -71,11 +76,8 @@ jobs:
     # caches, unused files can slowly pile up over time, causing larger caches are longer runtimes.
     sweep-cache: false
 
-    # Save the compiled `cargo-sweep` binary so that it can be downloaded from a cache in future
-    # runs.
-    #
-    # This only has effect if `sweep-cache` is true.
-    cache-cargo-sweep: true
+    # This input has been deprecated and will be removed in v3.0.0. It has no effect.
+    cache-cargo-sweep: ''
 ```
 
 ## Outputs

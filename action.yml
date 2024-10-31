@@ -33,9 +33,14 @@ inputs:
     required: false
     default: Cargo.toml
   save-always:
-    description: Save the cache even if a previous step fails.
+    description: |
+      This input has been deprecated and will be removed in v3.0.0. It has no effect.
+
+      This input used to specify the `save-always` input for `actions/cache`, but has been
+      deprecated due to its unintended behavior. If you still require this input, you will need
+      to manually use `actions/cache`. For more information, please see
+      <https://github.com/actions/cache/tree/v4/save#always-save-cache>.
     required: false
-    default: "true"
   save-if:
     description: |
       Determines if the cache should be saved, or only loaded.
@@ -54,12 +59,8 @@ inputs:
     default: "false"
   cache-cargo-sweep:
     description: |
-      Save the compiled `cargo-sweep` binary so that it can be downloaded from a cache in future
-      runs.
-
-      This only has effect if `sweep-cache` is true.
+      This input has been deprecated and will be removed in v3.0.0. It has no effect.
     required: false
-    default: "true"
 outputs:
   cache-hit:
     description: |
@@ -155,6 +156,12 @@ runs:
           echo 'cache-group=${{ hashFiles(env.workflow_path) }}-${{ github.job }}-${{ strategy.job-index }}' >> "${GITHUB_OUTPUT}"
         fi
 
+    - name: Log that `save-always` is deprecated
+      if: ${{ inputs.save-always }}
+      shell: bash
+      run: |
+        echo '::warning title=`save-always` is deprecated::`save-always` does not work as intended and will be removed in v3.0.0.'
+
     # If the cache should also be saved, we use the cache action
     # See <https://github.com/actions/cache>.
     - name: Restore and save cache
@@ -162,7 +169,6 @@ runs:
       uses: actions/cache@v4
       if: ${{ inputs.save-if == 'true' }}
       with:
-        save-always: ${{ inputs.save-always }}
         path: |
           ${{ inputs.cargo-home }}/bin/
           ${{ inputs.cargo-home }}/registry/index/
@@ -192,11 +198,14 @@ runs:
           ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-
           ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-
 
+    - name: Log that `cache-cargo-sweep` is deprecated
+      if: ${{ inputs.cache-cargo-sweep }}
+      shell: bash
+      run: |
+        echo '::warning title=`cache-cargo-sweep` is deprecated::With updates to `BD103/cargo-sweep`, it no longer has any effect. It will be removed in v3.0.0.'
+
     - name: Sweep cache
-      uses: BD103/cargo-sweep@v1
-      if: ${{ inputs.sweep-cache }}
+      uses: BD103/cargo-sweep@v2
+      if: ${{ inputs.sweep-cache == 'true' }}
       with:
-        use-cache: ${{ inputs.cache-cargo-sweep }}
-        # Prebuilt binaries are discouraged now that caching is supported. While it is false by
-        # default, this is a precautionary measure that opts-out.
-        use-prebuilt: false
+        manifest-path: ${{ inputs.manifest-path }}
