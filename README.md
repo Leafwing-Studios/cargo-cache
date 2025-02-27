@@ -36,7 +36,7 @@ jobs:
     # The group of the cache, defaulting to a unique identifier for the workflow job.
     #
     # If you want two jobs to share the same cache, give them the same group name.
-    cache-group: ${{ hashFiles(env.workflow_path)-${{ github.job }}-${{ strategy.job-index }}`
+    cache-group: ${{ hashFiles(env.workflow_path)-${{ github.job }}-${{ strategy.job-index }}
 
     # The location of the Cargo home directory.
     #
