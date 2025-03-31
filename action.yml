@@ -29,7 +29,7 @@ inputs:
     description: |
       The path to `Cargo.toml`.
 
-      This is used to determine where `Cargo.lock` and is, which is used in the cache key.
+      This is used to determine where `Cargo.toml` and `Cargo.lock` are, which are used in the cache key.
     required: false
     default: Cargo.toml
   save-always:
@@ -54,7 +54,7 @@ inputs:
       called and the end of the job.
 
       This can prevent the size of caches snowballing. Since old caches are used to create new
-      caches, unused files can slowly pile up over time, causing larger caches are longer runtimes.
+      caches, unused files can slowly pile up over time, causing larger caches and longer runtimes.
     required: false
     default: "false"
   cache-cargo-sweep:
