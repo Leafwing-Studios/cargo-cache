@@ -170,10 +170,17 @@ runs:
       if: ${{ inputs.save-if == 'true' }}
       with:
         path: |
+          # Tracks crates installed with `cargo install`.
+          ${{ inputs.cargo-home }}/.crates.toml
+          ${{ inputs.cargo-home }}/.crates2.json
+          # Path to binaries installed with `cargo install`.
           ${{ inputs.cargo-home }}/bin/
+          # Cached files downloaded from <https://crates.io> and other registries.
           ${{ inputs.cargo-home }}/registry/index/
           ${{ inputs.cargo-home }}/registry/cache/
+          # `.git` folders from checked-out repositories.
           ${{ inputs.cargo-home }}/git/db/
+          # The `target` directory.
           ${{ inputs.cargo-target-dir }}/
         key: ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
@@ -188,10 +195,17 @@ runs:
       if: ${{ inputs.save-if != 'true' }}
       with:
         path: |
+          # Tracks crates installed with `cargo install`.
+          ${{ inputs.cargo-home }}/.crates.toml
+          ${{ inputs.cargo-home }}/.crates2.json
+          # Path to binaries installed with `cargo install`.
           ${{ inputs.cargo-home }}/bin/
+          # Cached files downloaded from <https://crates.io> and other registries.
           ${{ inputs.cargo-home }}/registry/index/
           ${{ inputs.cargo-home }}/registry/cache/
+          # `.git` folders from checked-out repositories.
           ${{ inputs.cargo-home }}/git/db/
+          # The `target` directory.
           ${{ inputs.cargo-target-dir }}/
         key: ${{ runner.os }}-${{ steps.rust-version.outputs.rust-version }}-${{ steps.cache-group.outputs.cache-group }}-${{ hashFiles('**/Cargo.toml') }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
