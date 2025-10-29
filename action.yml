@@ -88,6 +88,10 @@ runs:
           exit 1
         fi
 
+    # jq is no longer on action runners by default
+    - name: Grab jq for cargo-cache
+      uses: dcarbone/install-jq-action@v3
+
     # The `Cargo.lock` file contains the exact crates used as dependencies.
     # It is important to use for the caching key, because it might become outdated otherwise.
     # If only the `Cargo.toml` file was used, patch releases of crates could cause unnecessary re-compiles.
