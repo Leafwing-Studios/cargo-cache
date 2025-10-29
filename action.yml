@@ -98,9 +98,8 @@ runs:
       env:
         MANIFEST_PATH: ${{ inputs.manifest-path }}
       run: |
-        # Locate the root `Cargo.toml` from the a given `Cargo.toml` manifest, then use `jq` to
-        # extract the result from JSON.
-        ROOT_MANIFEST=$(cargo locate-project --manifest-path "${MANIFEST_PATH}" --workspace | jq -r '.root')
+        # Locate the root `Cargo.toml` from the a given `Cargo.toml` manifest.
+        ROOT_MANIFEST=$(cargo locate-project --manifest-path "${MANIFEST_PATH}" --workspace --message-format plain)
 
         # Find the `Cargo.lock` that lives next to the root `Cargo.toml`.
         ROOT_LOCKFILE=$(dirname "${ROOT_MANIFEST}")/Cargo.lock
